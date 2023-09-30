@@ -72,9 +72,9 @@
 </template>
 
 <script>
-import Copyright from "~/components/Copyright.vue";
+import { supabase } from "~/plugins/supabase";
+
 export default {
-  components: { Copyright },
   data() {
     return {
       name: "",
@@ -83,19 +83,35 @@ export default {
     };
   },
   methods: {
-    signup() {
-      console.log(
-        "Daftar dengan nama:",
-        this.name,
-        "email:",
-        this.email,
-        "dan password:",
-        this.password
-      );
+    async signup() {
+      try {
+        const { user, error } = await supabase.auth.signUp({
+          email: this.email,
+          password: this.password,
+        });
+
+        if (error) {
+          console.error("Pendaftaran error:", error.message);
+          // Tampilkan pesan kesalahan kepada pengguna
+        } else {
+          // Pendaftaran berhasil, arahkan ke halaman selanjutnya (misalnya, /dashboard)
+          this.$router.push("/login");
+        }
+      } catch (error) {
+        console.error("Error:", error.message);
+        // Tangani kesalahan lainnya
+      }
     },
   },
 };
 </script>
+
+<style scoped>
+.logo {
+  max-width: 150px;
+  height: auto;
+}
+</style>
 
 <style scoped>
 .logo {

@@ -1,6 +1,5 @@
-<!-- components/ListDebit.vue -->
 <template>
-  <div class="border p-4">
+  <div class="bg-cyan-500 shadow-lg hover:bg-cyan-600 rounded-md max w-1/5 p-4">
     <h2 class="text-xl font-semibold">List Debit</h2>
     <ul>
       <li v-for="(item, index) in debitItems" :key="index">{{ item }}</li>
@@ -12,12 +11,8 @@
 export default {
   data() {
     return {
-      debitItems: ["Debit Item 1", "Debit Item 2", "Debit Item 3"], // Data sementara untuk list debit
+      debitItems: ["Debit Item 1", "Debit Item 2", "Debit Item 3"],
     };
   },
 };
 </script>
-
-<style scoped>
-/* Gaya khusus untuk komponen ListDebit.vue */
-</style>

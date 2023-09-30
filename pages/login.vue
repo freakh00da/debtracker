@@ -58,9 +58,8 @@
 </template>
 
 <script>
-import Copyright from "~/components/Copyright.vue";
+import { supabase } from "~/plugins/supabase";
 export default {
-  components: { Copyright },
   data() {
     return {
       email: "",
@@ -68,13 +67,25 @@ export default {
     };
   },
   methods: {
-    login() {
-      console.log(
-        "Login dengan email:",
-        this.email,
-        "dan password:",
-        this.password
-      );
+    async login() {
+      try {
+        const { user, error } = await supabase.auth.signInWithPassword({
+          email: this.email,
+          password: this.password,
+        });
+
+        if (error) {
+          console.error("Login error:", error.message);
+          // Tampilkan pesan kesalahan kepada pengguna
+        } else {
+          console.log("Login berhasil:", user);
+          // Redirect pengguna ke /dashboard setelah login sukses
+          this.$router.push("/dashboard");
+        }
+      } catch (error) {
+        console.error("Error:", error.message);
+        // Tangani kesalahan lainnya
+      }
     },
   },
 };

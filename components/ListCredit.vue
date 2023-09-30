@@ -1,6 +1,5 @@
-<!-- components/ListCredit.vue -->
 <template>
-  <div class="border p-4">
+  <div class="bg-cyan-500 shadow-lg hover:bg-cyan-600 rounded-md max w-1/5 p-4">
     <h2 class="text-xl font-semibold">List Credit</h2>
     <ul>
       <li v-for="(item, index) in creditItems" :key="index">{{ item }}</li>
