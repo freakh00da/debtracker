@@ -12,6 +12,7 @@
     "@nuxtjs/pwa": "^3.3.5",
     "@supabase/supabase-js": "^2.37.0",
     "core-js": "^3.25.3",
+    "daisyui": "^3.8.3",
     "nuxt": "^2.15.8",
     "vue": "^2.7.10",
     "vue-server-renderer": "^2.7.10",

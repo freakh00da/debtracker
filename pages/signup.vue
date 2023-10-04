@@ -92,14 +92,11 @@ export default {
 
         if (error) {
           console.error("Pendaftaran error:", error.message);
-          // Tampilkan pesan kesalahan kepada pengguna
         } else {
-          // Pendaftaran berhasil, arahkan ke halaman selanjutnya (misalnya, /dashboard)
           this.$router.push("/login");
         }
       } catch (error) {
         console.error("Error:", error.message);
-        // Tangani kesalahan lainnya
       }
     },
   },

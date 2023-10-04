@@ -68,23 +68,31 @@ export default {
   },
   methods: {
     async login() {
+      this.isLoading = true;
+      this.error = null;
       try {
-        const { user, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: this.email,
           password: this.password,
         });
 
         if (error) {
-          console.error("Login error:", error.message);
-          // Tampilkan pesan kesalahan kepada pengguna
+          console.error("Login error:", error);
+          this.error = "Gagal masuk. Periksa email dan password Anda.";
         } else {
-          console.log("Login berhasil:", user);
-          // Redirect pengguna ke /dashboard setelah login sukses
-          this.$router.push("/dashboard");
+          this.$store.commit("auth/setUser", data.user);
+
+          // Simpan session ke store
+          this.$store.commit("auth/setSession", data.session);
+
+          console.log("Login berhasil:", data.user.email);
+          this.$router.push("/profile");
         }
       } catch (error) {
         console.error("Error:", error.message);
-        // Tangani kesalahan lainnya
+        this.error = "Terjadi kesalahan saat memproses login.";
+      } finally {
+        this.isLoading = false;
       }
     },
   },

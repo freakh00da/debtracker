@@ -53,13 +53,6 @@
         </div>
       </div>
     </div>
-    <div class="absolute right-4 bottom-4">
-      <button
-        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
-      >
-        Logout
-      </button>
-    </div>
     <Copyright />
   </div>
 </template>
@@ -67,6 +60,7 @@
 <script>
 import Copyright from "~/components/Copyright.vue";
 export default {
+  // middleware: "checkSession",
   layout: "navbar",
   components: Copyright,
   data() {

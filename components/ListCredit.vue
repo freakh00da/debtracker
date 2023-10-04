@@ -11,12 +11,10 @@
 export default {
   data() {
     return {
-      creditItems: ["Credit Item 1", "Credit Item 2", "Credit Item 3"], // Data sementara untuk list kredit
+      creditItems: ["Credit Item 1", "Credit Item 2", "Credit Item 3"],
     };
   },
 };
 </script>
 
-<style scoped>
-/* Gaya khusus untuk komponen ListCredit.vue */
-</style>
+<style scoped></style>

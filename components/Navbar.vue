@@ -1,49 +1,42 @@
 <template>
-  <nav class="bg-blue-500 p-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <div class="w-56 h-auto">
-        <nuxt-link to="/dashboard" class="text-white text-lg font-semibold">
-          <img src="../assets/logo-ext.png" alt="Debtracker Logo" />
-        </nuxt-link>
-      </div>
-      <div>
-        <nuxt-link :to="profileLink" class="text-white text-xl">
-          {{ linkText }}
-        </nuxt-link>
+  <div class="navbar bg-slate-50 rounded shadow-xl">
+    <div class="flex-1">
+      <nuxt-link to="/dashboard"
+        ><img class="max-h-9" src="../assets/logo-ext.png" alt="debtrack"
+      /></nuxt-link>
+    </div>
+    <div class="flex-none gap-2">
+      <div class="dropdown dropdown-end">
+        <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+          <div class="w-10 rounded-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="w-10 h-10"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+        </label>
+        <ul
+          tabindex="0"
+          class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+        >
+          <li>
+            <nuxt-link to="/profile" class="justify-between">
+              Profile
+            </nuxt-link>
+          </li>
+          <li><a>Logout</a></li>
+        </ul>
       </div>
     </div>
-  </nav>
+  </div>
 </template>
 
-<script>
-export default {
-  data() {
-    if (this.$route.path === "/profile") {
-      return {
-        linkText: "to dashboard",
-      };
-    } else {
-      return {
-        linkText: "to profile",
-      };
-    }
-  },
-  computed: {
-    dashboardLink() {
-      return this.linkText === "to profile" ? "/dashboard" : "/profile";
-    },
-    profileLink() {
-      return this.linkText === "to profile" ? "/profile" : "/dashboard";
-    },
-  },
-  watch: {
-    $route(to, from) {
-      if (to.path === "/dashboard") {
-        this.linkText = "to profile";
-      } else if (to.path === "/profile") {
-        this.linkText = "to dashboard";
-      }
-    },
-  },
-};
-</script>
+<script></script>
