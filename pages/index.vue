@@ -36,8 +36,12 @@
 import Copyright from "~/components/Copyright.vue";
 export default {
   components: { Copyright },
+  // middleware: "loggedIn",
   data() {
     return {};
+  },
+  mounted() {
+    localStorage.clear();
   },
 };
 </script>

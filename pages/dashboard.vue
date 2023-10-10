@@ -4,12 +4,10 @@
       <Sidebar />
     </div>
     <div class="flex justify-center">
-      <div
-        class="border-solid border-2 rounded-xl my-10 bg-sky-50 shadow w-3/5"
-      >
+      <div class="border-solid border-2 rounded-xl my-10 bg-sky-50 shadow">
         <div>
-          <div class="flex justify-between">
-            <div class="w-4/5 m-4">
+          <div class="flex flex-wrap justify-between">
+            <div class="m-4">
               <FriendList />
             </div>
             <div>
@@ -39,7 +37,7 @@ import Sidebar from "~/components/Sidebar.vue";
 import Notification from "~/components/Notification.vue";
 
 export default {
-  // middleware: "checkSession",
+  middleware: "checkSession",
   layout: "navbar",
   components: {
     FriendList,

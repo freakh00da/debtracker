@@ -38,7 +38,7 @@
         <div class="mb-6">
           <button
             type="submit"
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+            class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg"
           >
             Masuk
           </button>
@@ -59,7 +59,9 @@
 
 <script>
 import { supabase } from "~/plugins/supabase";
+
 export default {
+  middleware: "loggedIn",
   data() {
     return {
       email: "",
@@ -68,8 +70,6 @@ export default {
   },
   methods: {
     async login() {
-      this.isLoading = true;
-      this.error = null;
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: this.email,
@@ -77,22 +77,15 @@ export default {
         });
 
         if (error) {
-          console.error("Login error:", error);
-          this.error = "Gagal masuk. Periksa email dan password Anda.";
+          console.error("Login error:", error.message);
         } else {
-          this.$store.commit("auth/setUser", data.user);
+          localStorage.setItem("access_token", data.session.access_token);
+          localStorage.setItem("id", data.user.id);
 
-          // Simpan session ke store
-          this.$store.commit("auth/setSession", data.session);
-
-          console.log("Login berhasil:", data.user.email);
-          this.$router.push("/profile");
+          this.$router.push("/dashboard");
         }
       } catch (error) {
         console.error("Error:", error.message);
-        this.error = "Terjadi kesalahan saat memproses login.";
-      } finally {
-        this.isLoading = false;
       }
     },
   },

@@ -24,6 +24,7 @@ import Friends from "~/components/Friends.vue";
 
 export default {
   components: { Sidebar, Friends },
+  middleware: "checkSession",
   layout: "navbar",
 };
 </script>

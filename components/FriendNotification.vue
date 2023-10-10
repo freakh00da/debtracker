@@ -1,58 +1,97 @@
 <template>
-  <div>
-    <!-- Open the modal using ID.showModal() method -->
-    <button class="btn btn-link" @click="showFriendRequestDetails()">
-      See More
-    </button>
-    <dialog id="friend_modal" class="modal">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Friend Request Details</h3>
-        <div class="py-4">
-          <p><strong>Name:</strong> {{ friendRequest.name }}</p>
-          <p><strong>email:</strong> {{ friendRequest.email }}</p>
-          <p><strong>message:</strong> {{ friendRequest.message }}</p>
-        </div>
-        <div class="flex gap-2">
-          <button class="btn" @click="acceptFriendRequest()">Accept</button>
-          <button class="btn" @click="ignoreFriendRequest()">Ignore</button>
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop">
-        <button @click="closeModal()">Close</button>
-      </form>
-    </dialog>
+  <div v-show="!data.ignored">
+    <h3 class="font-bold text-lg">Friend Request Details</h3>
+    <div class="py-4">
+      <p><strong>Name:</strong> {{ data.name }}</p>
+      <p><strong>Email:</strong> {{ data.email }}</p>
+      <p><strong>Message:</strong> {{ data.message }}</p>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn" @click="acceptFriendRequest()">Accept</button>
+      <button class="btn" @click="ignoreFriendRequest()">Ignore</button>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-      friendRequest: {
-        name: "John Doe", // Gantilah dengan data friend request yang sesuai
-        email: "john@email.com",
-        message: "lorem ipsum dolor sit amet", // Gantilah dengan data friend request yang sesuai
-      },
-    };
+  props: {
+    data: Object,
   },
   methods: {
-    showFriendRequestDetails() {
-      // Implementasikan logika untuk menampilkan detail permintaan teman
-      // Misalnya, ambil data dari server atau tampilkan data yang ada di komponen
-      friend_modal.showModal();
+    async acceptFriendRequest() {
+      const key = process.env.apiKey;
+      const id = localStorage.getItem("id");
+      const myData = await this.getUserData(this.data.friend_id, key);
+      const otherData = await this.getUserData(id, key);
+
+      try {
+        const addFriendToMe = await this.$axios.post(
+          "/v1/friends",
+          {
+            id: id,
+            friend_id: this.data.friend_id,
+            email: this.data.email,
+            username: myData.username,
+          },
+          {
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${key}`,
+              "Content-Type": "application/json",
+              Prefer: "return=minimal",
+            },
+          }
+        );
+        const addMeToFriend = await this.$axios.post(
+          "/v1/friends",
+          {
+            id: this.data.friend_id,
+            friend_id: id,
+            email: otherData.email,
+            username: otherData.username,
+          },
+          {
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${key}`,
+              "Content-Type": "application/json",
+              Prefer: "return=minimal",
+            },
+          }
+        );
+
+        if (addFriendToMe.status === 201 && addMeToFriend.status === 201) {
+          await this.ignoreFriendRequest();
+        }
+      } catch (error) {}
     },
-    acceptFriendRequest() {
-      // Implementasikan logika untuk menerima permintaan teman
-      // Misalnya, kirim permintaan ke server
-      this.closeModal();
+    async getUserData(friendId, key) {
+      const response = await this.$axios.get(`/v1/users?id=eq.${friendId}`, {
+        headers: { apikey: key, Authorization: `Bearer ${key}` },
+      });
+      return response.data[0];
     },
-    ignoreFriendRequest() {
-      // Implementasikan logika untuk mengabaikan permintaan teman
-      // Misalnya, hapus permintaan dari daftar atau kirim permintaan ke server
-      this.closeModal();
-    },
-    closeModal() {
-      friend_modal.close();
+
+    async ignoreFriendRequest() {
+      const key = process.env.apiKey;
+
+      try {
+        const response = await this.$axios.delete(
+          `/v1/notifications?nid=eq.${this.data.nid}`,
+          {
+            headers: { apikey: key, Authorization: `Bearer ${key}` },
+          }
+        );
+
+        if (response.status === 204) {
+          this.$emit("ignore-notification", this.data);
+        } else {
+          console.error("Error:", response.error);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
     },
   },
 };

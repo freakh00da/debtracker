@@ -1,9 +1,9 @@
 <template>
-  <div class="navbar bg-slate-50 rounded shadow-xl">
+  <div class="navbar bg-slate-50 shadow-md">
     <div class="flex-1">
-      <nuxt-link to="/dashboard"
-        ><img class="max-h-9" src="../assets/logo-ext.png" alt="debtrack"
-      /></nuxt-link>
+      <nuxt-link to="/dashboard">
+        <img class="max-h-9" src="../assets/logo-ext.png" alt="debtrack" />
+      </nuxt-link>
     </div>
     <div class="flex-none gap-2">
       <div class="dropdown dropdown-end">
@@ -32,11 +32,36 @@
               Profile
             </nuxt-link>
           </li>
-          <li><a>Logout</a></li>
+          <li>
+            <a @click="logout">Logout</a>
+          </li>
         </ul>
       </div>
     </div>
   </div>
 </template>
 
-<script></script>
+<script>
+import { supabase } from "~/plugins/supabase";
+
+export default {
+  methods: {
+    async logout() {
+      try {
+        let { error } = await supabase.auth.signOut();
+
+        if (error) {
+          console.error("Logout error:", error.message);
+        } else {
+          localStorage.removeItem("id");
+          localStorage.removeItem("access_token");
+
+          this.$router.push("/login");
+        }
+      } catch (error) {
+        console.error("Error:", error.message);
+      }
+    },
+  },
+};
+</script>

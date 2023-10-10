@@ -25,11 +25,15 @@ export default {
     // https://go.nuxtjs.dev/tailwindcss
     "@nuxtjs/tailwindcss",
   ],
+  axios: {
+    baseURL: "https://zwdkupcwigmhvnhvvnlg.supabase.co/rest",
+  },
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/pwa
     "@nuxtjs/pwa",
+    "@nuxtjs/axios",
   ],
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
@@ -38,7 +42,11 @@ export default {
       lang: "en",
     },
   },
+  env: {
+    apiKey: process?.env?.SUPABASE_KEY,
+  },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
+  ssr: false,
 };

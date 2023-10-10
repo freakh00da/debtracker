@@ -1,7 +1,10 @@
-export default function ({ store, redirect }) {
-  const session = store.state.auth.session;
+import { supabase } from "~/plugins/supabase";
+export default async function ({ redirect }) {
+  const { data } = await supabase.auth.getSession();
 
-  if (!session || !session.access_token) {
+  const accessToken = localStorage.getItem("access_token");
+
+  if (data.session.access_token !== accessToken) {
     return redirect("/login");
   }
 }

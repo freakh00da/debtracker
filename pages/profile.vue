@@ -6,8 +6,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <h2 class="text-lg font-semibold">Informasi Umum</h2>
-            <p>Nama: {{ user.name }}</p>
-            <p>Email: {{ user.email }}</p>
+            <p>Nama: {{ userNow.name }}</p>
+            <p>Email: {{ userNow.email }}</p>
           </div>
           <div>
             <h2 class="text-lg font-semibold">Edit Profil</h2>
@@ -54,31 +54,119 @@
       </div>
     </div>
     <Copyright />
+    <NotificationSuccess
+      v-if="showSuccessNotification"
+      :message="successMessage"
+      @close="showSuccessNotification = false"
+    />
+    <NotificationFailed
+      v-if="showFailedNotification"
+      :message="failedMessage"
+      @close="showFailedNotification = false"
+    />
   </div>
 </template>
 
 <script>
+import NotificationSuccess from "@/components/NotificationSuccess.vue";
+import NotificationFailed from "@/components/NotificationFailed.vue";
 import Copyright from "~/components/Copyright.vue";
+import { supabase } from "~/plugins/supabase";
+
 export default {
-  // middleware: "checkSession",
+  middleware: "checkSession",
   layout: "navbar",
-  components: Copyright,
+  components: { NotificationSuccess, NotificationFailed, Copyright },
+  methods: {
+    async getUser() {
+      try {
+        const key = process.env.apiKey;
+        const id = localStorage.getItem("id");
+
+        const response = await this.$axios.get(
+          `/v1/users?select=*&&id=eq.${id}`,
+          {
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${key}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          this.userNow.name = response.data[0].username;
+          this.userNow.email = response.data[0].email;
+        } else {
+          console.error("error", response.error);
+        }
+      } catch (error) {
+        console.error("error", error);
+      }
+    },
+    async editProfile() {
+      try {
+        const key = process.env.apiKey;
+        const id = localStorage.getItem("id");
+
+        const response = await this.$axios.patch(
+          `/v1/users?id=eq.${id}`,
+          {
+            username: this.editedUser.name,
+            email: this.editedUser.email,
+          },
+          {
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${key}`,
+              "Content-Type": "application/json",
+              Prefer: "return=minimal",
+            },
+          }
+        );
+
+        const { data } = await supabase.auth.updateUser({
+          email: this.editedUser.email,
+        });
+
+        if (response.status === 200) {
+          await this.getUser();
+          this.showSuccess("Profil berhasil diubah.");
+        } else {
+          this.showFailed("Gagal mengubah profil.");
+          console.error("error", response.error);
+        }
+      } catch (error) {
+        this.showFailed("Gagal mengubah profil.");
+        console.error("error", error);
+      }
+    },
+    showSuccess(message) {
+      this.successMessage = message;
+      this.showSuccessNotification = true;
+    },
+    showFailed(message) {
+      this.failedMessage = message;
+      this.showFailedNotification = true;
+    },
+  },
+  async mounted() {
+    await this.getUser();
+  },
   data() {
     return {
-      user: {
-        name: "Nama Pengguna",
-        email: "contoh@example.com",
+      userNow: {
+        name: "",
+        email: "",
       },
       editedUser: {
         name: "",
         email: "",
       },
+      showSuccessNotification: false,
+      successMessage: "",
+      showFailedNotification: false,
+      failedMessage: "",
     };
-  },
-  methods: {
-    editProfile() {
-      console.log("Profil diubah menjadi:", this.editedUser);
-    },
   },
 };
 </script>

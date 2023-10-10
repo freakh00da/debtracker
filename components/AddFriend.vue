@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Open the modal using ID.showModal() method -->
     <button class="btn" @click="openModal">Add Friend</button>
     <dialog id="my_modal_1" class="modal">
       <div class="modal-box">
@@ -36,6 +35,18 @@
         </form>
       </div>
     </dialog>
+
+    <NotificationSuccess
+      v-if="showSuccessNotification"
+      :message="successMessage"
+      @close="showSuccessNotification = false"
+    />
+
+    <NotificationFailed
+      v-if="showFailedNotification"
+      :message="failedMessage"
+      @close="showFailedNotification = false"
+    />
   </div>
 </template>
 
@@ -45,6 +56,10 @@ export default {
     return {
       email: "",
       message: "",
+      showSuccessNotification: false,
+      successMessage: "",
+      showFailedNotification: false,
+      failedMessage: "",
     };
   },
   methods: {
@@ -56,10 +71,71 @@ export default {
       const modal = document.getElementById("my_modal_1");
       modal.close();
     },
-    sendRequest() {
-      console.log("Email:", this.email);
-      console.log("Message:", this.message);
-      this.closeModal();
+    async sendRequest() {
+      const message = this.message;
+
+      const userId = localStorage.getItem("id");
+      const key = process.env.apiKey;
+      const sender = await this.getSender(userId, key);
+      const id = await this.getId(this.email, key);
+
+      this.$axios
+        .post(
+          "/v1/notifications",
+          {
+            email: sender.email,
+            message: message,
+            type: "friend-request",
+            id: id,
+            status: "pending",
+            name: sender.username,
+            friend_id: userId,
+          },
+          {
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${key}`,
+              "Content-Type": "application/json",
+              Prefer: "return=minimal",
+            },
+          }
+        )
+        .then((response) => {
+          console.log("Response:", response.data);
+          this.closeModal();
+
+          this.showSuccess("Permintaan pertemanan berhasil dikirim.");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+
+          this.showFailed("Gagal mengirim permintaan pertemanan.");
+        });
+    },
+    async getSender(id, key) {
+      const response = await this.$axios.get(`/v1/users?id=eq.${id}`, {
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+        },
+      });
+      return response.data[0];
+    },
+    async getId(email, key) {
+      const response = await this.$axios.get(`v1/users?email=eq.${email}`, {
+        headers: { apikey: key, Authorization: `Bearer ${key}` },
+      });
+      return response.data[0].id;
+    },
+
+    showSuccess(message) {
+      this.successMessage = message;
+      this.showSuccessNotification = true;
+    },
+
+    showFailed(message) {
+      this.failedMessage = message;
+      this.showFailedNotification = true;
     },
   },
 };

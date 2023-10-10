@@ -1,53 +1,96 @@
 <template>
-  <div>
-    <!-- Open the modal using ID.showModal() method -->
-    <button class="btn btn-link" @click="showDebtRequestDetails()">
-      See More
-    </button>
-    <dialog id="debt_modal" class="modal">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Debt Request Details</h3>
-        <div class="py-4">
-          <p><strong>Name:</strong> {{ debtRequest.name }}</p>
-          <p><strong>Ammount:</strong> {{ debtRequest.ammount }}</p>
-        </div>
-        <div class="flex gap-2">
-          <button class="btn" @click="acceptDebtRequest()">Accept</button>
-          <button class="btn" @click="ignoreDebtRequest()">Ignore</button>
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop">
-        <button @click="closeModal()">Close</button>
-      </form>
-    </dialog>
+  <div v-show="!data.ignored">
+    <h3 class="font-bold text-lg">Debit Request Details</h3>
+    <div class="py-4">
+      <p><strong>Name:</strong> {{ data.name }}</p>
+      <p><strong>Email:</strong> {{ data.email }}</p>
+      <p><strong>Message:</strong> {{ data.message }}</p>
+      <p><strong>Amount:</strong> {{ data.amount }}</p>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn" @click="acceptDebtRequest()">Accept</button>
+      <button class="btn" @click="ignoreDebtRequest()">Ignore</button>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-      debtRequest: {
-        name: "John Doe", // Gantilah dengan data friend request yang sesuai
-        ammount: 10.0, // Gantilah dengan data friend request yang sesuai
-      },
-    };
+  props: {
+    data: Object,
   },
   methods: {
     showDebtRequestDetails() {
-      // Implementasikan logika untuk menampilkan detail permintaan teman
-      // Misalnya, ambil data dari server atau tampilkan data yang ada di komponen
       debt_modal.showModal();
     },
-    acceptDebtRequest() {
-      // Implementasikan logika untuk menerima permintaan teman
-      // Misalnya, kirim permintaan ke server
-      this.closeModal();
+    async acceptDebtRequest() {
+      const key = process.env.apiKey;
+
+      try {
+        const meToOtherResponse = await this.$axios.post(
+          "/v1/transactions",
+          {
+            type: "credit",
+            amount: this.data.amount,
+            message: this.data.message,
+            id: this.data.friend_id,
+            friend_id: this.data.id,
+          },
+          {
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${key}`,
+            },
+          }
+        );
+
+        const otherToMeResponse = await this.$axios.post(
+          "/v1/transactions",
+          {
+            type: "debit",
+            amount: this.data.amount,
+            message: this.data.message,
+            id: this.data.id,
+            friend_id: this.data.friend_id,
+            status: "accepted",
+          },
+          {
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${key}`,
+            },
+          }
+        );
+
+        if (
+          meToOtherResponse.status === 201 &&
+          otherToMeResponse.status === 201
+        ) {
+          await this.ignoreDebtRequest();
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
     },
-    ignoreDebtRequest() {
-      // Implementasikan logika untuk mengabaikan permintaan teman
-      // Misalnya, hapus permintaan dari daftar atau kirim permintaan ke server
-      this.closeModal();
+    async ignoreDebtRequest() {
+      const key = process.env.apiKey;
+
+      try {
+        const response = await this.$axios.delete(
+          `/v1/notifications?nid=eq.${this.data.nid}`,
+          {
+            headers: { apikey: key, Authorization: `Bearer ${key}` },
+          }
+        );
+
+        if (response.status === 204) {
+          this.$emit("ignore-notification", this.data);
+        } else {
+          console.error("Error:", response.error);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
     },
     closeModal() {
       debt_modal.close();
