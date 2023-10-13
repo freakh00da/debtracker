@@ -128,7 +128,7 @@ export default {
           email: this.editedUser.email,
         });
 
-        if (response.status === 200) {
+        if (response.status === 204) {
           await this.getUser();
           this.showSuccess("Profil berhasil diubah.");
         } else {
